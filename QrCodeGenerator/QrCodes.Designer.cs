@@ -43,13 +43,16 @@
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAllInFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statisticToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.QrCountNumber)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // QrCountNumber
             // 
-            this.QrCountNumber.Location = new System.Drawing.Point(12, 71);
+            this.QrCountNumber.Location = new System.Drawing.Point(12, 18);
             this.QrCountNumber.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -66,7 +69,7 @@
             // 
             // GenerateNewButton
             // 
-            this.GenerateNewButton.Location = new System.Drawing.Point(154, 68);
+            this.GenerateNewButton.Location = new System.Drawing.Point(154, 15);
             this.GenerateNewButton.Name = "GenerateNewButton";
             this.GenerateNewButton.Size = new System.Drawing.Size(88, 23);
             this.GenerateNewButton.TabIndex = 2;
@@ -87,7 +90,7 @@
             // NewQrCodesList
             // 
             this.NewQrCodesList.FormattingEnabled = true;
-            this.NewQrCodesList.Location = new System.Drawing.Point(12, 98);
+            this.NewQrCodesList.Location = new System.Drawing.Point(12, 45);
             this.NewQrCodesList.Name = "NewQrCodesList";
             this.NewQrCodesList.Size = new System.Drawing.Size(230, 238);
             this.NewQrCodesList.TabIndex = 4;
@@ -95,7 +98,7 @@
             // SaveButton
             // 
             this.SaveButton.Enabled = false;
-            this.SaveButton.Location = new System.Drawing.Point(271, 98);
+            this.SaveButton.Location = new System.Drawing.Point(271, 45);
             this.SaveButton.Name = "SaveButton";
             this.SaveButton.Size = new System.Drawing.Size(273, 23);
             this.SaveButton.TabIndex = 5;
@@ -107,7 +110,7 @@
             // CleanButton
             // 
             this.CleanButton.Enabled = false;
-            this.CleanButton.Location = new System.Drawing.Point(271, 156);
+            this.CleanButton.Location = new System.Drawing.Point(271, 103);
             this.CleanButton.Name = "CleanButton";
             this.CleanButton.Size = new System.Drawing.Size(273, 23);
             this.CleanButton.TabIndex = 8;
@@ -118,7 +121,7 @@
             // CopyButton
             // 
             this.CopyButton.Enabled = false;
-            this.CopyButton.Location = new System.Drawing.Point(271, 127);
+            this.CopyButton.Location = new System.Drawing.Point(271, 74);
             this.CopyButton.Name = "CopyButton";
             this.CopyButton.Size = new System.Drawing.Size(273, 23);
             this.CopyButton.TabIndex = 9;
@@ -150,7 +153,7 @@
             // 
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveNewButton_Click);
             // 
@@ -158,7 +161,7 @@
             // 
             this.cleanToolStripMenuItem.Enabled = false;
             this.cleanToolStripMenuItem.Name = "cleanToolStripMenuItem";
-            this.cleanToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cleanToolStripMenuItem.Size = new System.Drawing.Size(104, 22);
             this.cleanToolStripMenuItem.Text = "Clean";
             this.cleanToolStripMenuItem.Click += new System.EventHandler(this.CleanButton_Click);
             // 
@@ -175,36 +178,53 @@
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.LoadButton_Click);
             // 
             // exportAllInFileToolStripMenuItem
             // 
             this.exportAllInFileToolStripMenuItem.Name = "exportAllInFileToolStripMenuItem";
-            this.exportAllInFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exportAllInFileToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.exportAllInFileToolStripMenuItem.Text = "Export";
             this.exportAllInFileToolStripMenuItem.Click += new System.EventHandler(this.SaveAllButton_Click);
             // 
             // statisticToolStripMenuItem
             // 
             this.statisticToolStripMenuItem.Name = "statisticToolStripMenuItem";
-            this.statisticToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.statisticToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.statisticToolStripMenuItem.Text = "Statistic";
             this.statisticToolStripMenuItem.Click += new System.EventHandler(this.StatisticButton_Click);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(228, 27);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(316, 23);
+            this.progressBar1.TabIndex = 11;
+            this.progressBar1.Visible = false;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.CopyButton);
+            this.panel1.Controls.Add(this.CleanButton);
+            this.panel1.Controls.Add(this.SaveButton);
+            this.panel1.Controls.Add(this.NewQrCodesList);
+            this.panel1.Controls.Add(this.GenerateNewButton);
+            this.panel1.Controls.Add(this.QrCountNumber);
+            this.panel1.Location = new System.Drawing.Point(0, 56);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(556, 297);
+            this.panel1.TabIndex = 12;
             // 
             // QrCodes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(556, 354);
-            this.Controls.Add(this.CopyButton);
-            this.Controls.Add(this.CleanButton);
-            this.Controls.Add(this.SaveButton);
-            this.Controls.Add(this.NewQrCodesList);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.Title);
-            this.Controls.Add(this.GenerateNewButton);
-            this.Controls.Add(this.QrCountNumber);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "QrCodes";
@@ -212,6 +232,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.QrCountNumber)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,6 +254,8 @@
         private System.Windows.Forms.ToolStripMenuItem statisticToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cleanToolStripMenuItem;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

@@ -20,7 +20,7 @@ namespace QrCodeGenerator
             InitializeComponent();
         }
 
-        private void LoadButton_Click(object sender, EventArgs e)
+        private async void LoadButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "Item|*.csv";
@@ -28,20 +28,33 @@ namespace QrCodeGenerator
 
             if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
             Regex regex = new Regex("^MQ(\\d{12})$");
+            int lineCount = 0;
+            using (StreamReader reader = new StreamReader(openFileDialog1.OpenFile()))
+            {
+                while (reader.ReadLine() != null)
+                {
+                    lineCount++;
+                }
+            }
+            progressBar1.Maximum = lineCount;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+            panel1.Enabled = false;
+            menuStrip1.Enabled = false;
             using (StreamReader reader = new StreamReader(openFileDialog1.OpenFile()))
             {
                 string data;
                 int index = 0;
                 using (QrCodesDbContext p = new QrCodesDbContext())
                 {
-
-                    while ((data = reader.ReadLine()) != null)
+                    while ((data = await reader.ReadLineAsync()) != null)
                     {
+                        index++;
+                        progressBar1.Value = index;
                         string[] items = data.Split(';', ',');
                         foreach (var item in items)
                         {
                             Match match = regex.Match(item);
-
                             if (!match.Success) continue;
                             if (!long.TryParse(match.Groups[1].Value, out long longValue)) continue;
                             if (p.QrCodes.Select(qr => qr.Code).Any(c => c == longValue)) continue;
@@ -52,23 +65,33 @@ namespace QrCodeGenerator
                                     Code = longValue,
                                     CreatedAt = DateTime.Now
                                 });
-                            index++;
-                            if (index % 1000 == 0) p.SaveChanges();
+
+                            if (index % 1000 == 0) await p.SaveChangesAsync();
                         }
                     }
-                    p.SaveChanges();
+                    await p.SaveChangesAsync();
 
                 }
             }
+            panel1.Enabled = true;
+            menuStrip1.Enabled = true;
+            progressBar1.Visible = false;
         }
 
         private void GenerateNewButton_Click(object sender, EventArgs e)
         {
-            decimal count = QrCountNumber.Value;
+            int count = (int)QrCountNumber.Value;
+            progressBar1.Maximum = count;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+            panel1.Enabled = false;
+            menuStrip1.Enabled = false;
+
             using (QrCodesDbContext p = new QrCodesDbContext())
             {
-                for (decimal index = 0; index < count; index++)
+                for (int index = 0; index < count; index++)
                 {
+                    progressBar1.Value = index;
                     long data = random.Next(1000000000000);
                     while (newData.Contains(data) || p.QrCodes.Select(t => t.Code).Contains(data))
                     {
@@ -82,7 +105,9 @@ namespace QrCodeGenerator
             {
                 NewQrCodesList.Items.Add(item.ToQrCode());
             }
-
+            panel1.Enabled = true;
+            menuStrip1.Enabled = true;
+            progressBar1.Visible = false;
             GenerateNewButton.Enabled = false;
             saveToolStripMenuItem.Enabled = true;
             SaveButton.Enabled = true;
@@ -92,7 +117,7 @@ namespace QrCodeGenerator
 
         }
 
-        private void SaveNewButton_Click(object sender, EventArgs e)
+        private async void SaveNewButton_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Item|*.csv";
@@ -100,25 +125,37 @@ namespace QrCodeGenerator
 
             if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
 
+            progressBar1.Maximum = newData.Count;
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+            panel1.Enabled = false;
+            menuStrip1.Enabled = false;
+
             using (StreamWriter writer = new StreamWriter(saveFileDialog.OpenFile()))
             {
                 using (QrCodesDbContext p = new QrCodesDbContext())
                 {
                     foreach (var item in newData)
                     {
-                        writer.WriteLine($"{item.ToQrCode()}");
-                        if (p.QrCodes.Select(qr => qr.Code).Any(c => c == item)) continue;
-
-                        p.QrCodes.Add(
-                            new QrCode()
-                            {
-                                Code = item,
-                                CreatedAt = DateTime.Now
-                            });
-                        p.SaveChanges();
+                        await writer.WriteLineAsync($"{item.ToQrCode()}");
+                        if (!p.QrCodes.Select(t => t.Code).Contains(item))
+                        {
+                            p.QrCodes.Add(
+                                new QrCode()
+                                {
+                                    Code = item,
+                                    CreatedAt = DateTime.Now
+                                });
+                        }
+                        progressBar1.Value++;
                     }
+                    await p.SaveChangesAsync();
                 }
             }
+
+            progressBar1.Visible = false;
+            panel1.Enabled = true;
+            menuStrip1.Enabled = true;
         }
 
         private void SaveAllButton_Click(object sender, EventArgs e)
@@ -129,16 +166,27 @@ namespace QrCodeGenerator
 
             if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
 
-            using (StreamWriter writer = new StreamWriter(saveFileDialog.OpenFile()))
+
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
+            panel1.Enabled = false;
+            menuStrip1.Enabled = false;
+
+            using (QrCodesDbContext p = new QrCodesDbContext())
             {
-                using (QrCodesDbContext p = new QrCodesDbContext())
+                progressBar1.Maximum = p.QrCodes.Count();
+                using (StreamWriter writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
-                    foreach (var item in p.QrCodes.OrderBy(t=>t.CreatedAt))
+                    foreach (var item in p.QrCodes.OrderBy(t => t.CreatedAt))
                     {
                         writer.WriteLine($"{item.Code.ToQrCode()},{item.CreatedAt:G}");
+                        progressBar1.Value++;
                     }
                 }
             }
+            progressBar1.Visible = false;
+            panel1.Enabled = true;
+            menuStrip1.Enabled = true;
         }
 
         private void CleanButton_Click(object sender, EventArgs e)
@@ -153,11 +201,27 @@ namespace QrCodeGenerator
             GenerateNewButton.Enabled = true;
         }
 
-        private void CopyButton_Click(object sender, EventArgs e)
+        private async void CopyButton_Click(object sender, EventArgs e)
         {
             string s1 = "";
-            foreach (object item in NewQrCodesList.Items)
-                s1 += item.ToString() + "\r\n";
+            using (QrCodesDbContext p = new QrCodesDbContext())
+            {
+                foreach (long item in newData)
+                {
+                    s1 += item.ToQrCode() + "\r\n";
+                    if (!p.QrCodes.Select(t => t.Code).Contains(item))
+                    {
+                        p.QrCodes.Add(
+                            new QrCode()
+                            {
+                                Code = item,
+                                CreatedAt = DateTime.Now
+                            });
+                    }
+                }
+                await p.SaveChangesAsync();
+            }
+
             Clipboard.SetText(s1);
         }
 
@@ -165,10 +229,10 @@ namespace QrCodeGenerator
         {
             using (QrCodesDbContext p = new QrCodesDbContext())
             {
-                DateTime today = DateTime.Today;;
+                DateTime today = DateTime.Today;
                 long totalCount = p.QrCodes.Count();
                 long thisMonthCount = p.QrCodes.Count(qr => qr.CreatedAt.Month == today.Month);
-                long todayCount = p.QrCodes.Count(qr => qr.CreatedAt>=today);
+                long todayCount = p.QrCodes.Count(qr => qr.CreatedAt >= today);
                 MessageBox.Show($"Total:{totalCount}\r\nThis Month:{thisMonthCount}\r\nToday:{todayCount}", "Statistic", MessageBoxButtons.OK);
             }
         }
