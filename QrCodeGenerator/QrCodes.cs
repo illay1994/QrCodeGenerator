@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using QrCodeGenerator.DataStorage;
 
@@ -43,39 +45,52 @@ namespace QrCodeGenerator
             menuStrip1.Enabled = false;
             using (StreamReader reader = new StreamReader(openFileDialog1.OpenFile()))
             {
+                List<long> batchCodes = new List<long>();
                 string data;
-                int index = 0;
-                using (QrCodesDbContext p = new QrCodesDbContext())
+                while ((data = await reader.ReadLineAsync()) != null)
                 {
-                    while ((data = await reader.ReadLineAsync()) != null)
-                    {
-                        index++;
-                        progressBar1.Value = index;
-                        string[] items = data.Split(';', ',');
-                        foreach (var item in items)
-                        {
-                            Match match = regex.Match(item);
-                            if (!match.Success) continue;
-                            if (!long.TryParse(match.Groups[1].Value, out long longValue)) continue;
-                            if (p.QrCodes.Select(qr => qr.Code).Any(c => c == longValue)) continue;
-
-                            p.QrCodes.Add(
-                                new QrCode()
+                    progressBar1.Value++;
+                    batchCodes.AddRange(
+                            data.Split(';', ',')
+                                .AsParallel()
+                                .Select(t => regex.Match(t))
+                                .Where(t => t.Success)
+                                .Select(t => t.Groups[1].Value)
+                                .Select(str =>
                                 {
-                                    Code = longValue,
-                                    CreatedAt = DateTime.Now
-                                });
-
-                            if (index % 1000 == 0) await p.SaveChangesAsync();
-                        }
-                    }
-                    await p.SaveChangesAsync();
-
+                                    bool success = long.TryParse(str, out long value);
+                                    return new { value, success };
+                                })
+                            .Where(pair => pair.success)
+                            .Select(pair => pair.value)
+                        .ToArray());
+                    if (batchCodes.Count < 1000) continue;
+                    await AddOrSkipItem(batchCodes);
+                    batchCodes.Clear();
                 }
+                await AddOrSkipItem(batchCodes);
+
             }
             panel1.Enabled = true;
             menuStrip1.Enabled = true;
             progressBar1.Visible = false;
+        }
+
+        public async Task AddOrSkipItem(ICollection<long> batchCodes)
+        {
+            using (QrCodesDbContext p = new QrCodesDbContext())
+            {
+                var existing = p.QrCodes.Select(qr => qr.Code).Where(t => batchCodes.Contains(t));
+                var insertedData = batchCodes
+                    .Except(existing)
+                    .Select(t => new QrCode()
+                    {
+                        Code = t,
+                        CreatedAt = DateTime.Now
+                    });
+                p.QrCodes.AddRange(insertedData);
+                await p.SaveChangesAsync();
+            }
         }
 
         private void GenerateNewButton_Click(object sender, EventArgs e)
@@ -234,6 +249,31 @@ namespace QrCodeGenerator
                 long thisMonthCount = p.QrCodes.Count(qr => qr.CreatedAt.Month == today.Month);
                 long todayCount = p.QrCodes.Count(qr => qr.CreatedAt >= today);
                 MessageBox.Show($"Total:{totalCount}\r\nThis Month:{thisMonthCount}\r\nToday:{todayCount}", "Statistic", MessageBoxButtons.OK);
+            }
+        }
+
+        private async void CleanDbButton_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Do you want clean DataBase?", "Comfirm", MessageBoxButtons.YesNo) !=
+                    DialogResult.Yes)
+            {
+                return;
+            }
+            using (QrCodesDbContext p = new QrCodesDbContext())
+            {
+                progressBar1.Maximum = p.QrCodes.Count() / 1000;
+                progressBar1.Value = 0;
+                progressBar1.Visible = true;
+                panel1.Enabled = false;
+                menuStrip1.Enabled = false;
+                do
+                {
+                    progressBar1.Value++;
+                    p.QrCodes.RemoveRange(p.QrCodes.Take(1000));
+                } while (await p.SaveChangesAsync() > 0);
+                progressBar1.Visible = false;
+                panel1.Enabled = true;
+                menuStrip1.Enabled = true;
             }
         }
     }
