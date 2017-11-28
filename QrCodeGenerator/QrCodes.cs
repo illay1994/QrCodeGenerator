@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -61,9 +60,9 @@ namespace QrCodeGenerator
                                     bool success = long.TryParse(str, out long value);
                                     return new { value, success };
                                 })
-                            .Where(pair => pair.success)
-                            .Select(pair => pair.value)
-                        .ToArray());
+                                .Where(pair => pair.success)
+                                .Select(pair => pair.value)
+                            .ToArray());
                     if (batchCodes.Count < 1000) continue;
                     await AddOrSkipItem(batchCodes);
                     batchCodes.Clear();
@@ -101,18 +100,14 @@ namespace QrCodeGenerator
             progressBar1.Visible = true;
             panel1.Enabled = false;
             menuStrip1.Enabled = false;
-
             using (QrCodesDbContext p = new QrCodesDbContext())
             {
-                for (int index = 0; index < count; index++)
+                while (newData.Count < count)
                 {
-                    progressBar1.Value = index;
-                    long data = random.Next(1000000000000);
-                    while (newData.Contains(data) || p.QrCodes.Select(t => t.Code).Contains(data))
-                    {
-                        data = random.Next(1000000000000);
-                    }
-                    newData.Add(data);
+                    var temp = GenerateNewElements(Math.Min(count - newData.Count, 1000), random, newData);
+                    temp.ExceptWith(p.QrCodes.Select(t => t.Code).Where(t => temp.Contains(t)));
+                    newData.UnionWith(temp);
+                    progressBar1.Value = newData.Count;
                 }
             }
             NewQrCodesList.Items.Clear();
@@ -130,6 +125,21 @@ namespace QrCodeGenerator
             CleanButton.Enabled = true;
             CopyButton.Enabled = true;
 
+        }
+
+        private static ISet<long> GenerateNewElements(long count, Random random, ISet<long> existSet)
+        {
+            var result = new HashSet<long>();
+            for (int index = 0; index < count; index++)
+            {
+                long data = random.Next(1000000000000);
+                while (existSet.Contains(data))
+                {
+                    data = random.Next(1000000000000);
+                }
+                result.Add(data);
+            }
+            return result;
         }
 
         private async void SaveNewButton_Click(object sender, EventArgs e)

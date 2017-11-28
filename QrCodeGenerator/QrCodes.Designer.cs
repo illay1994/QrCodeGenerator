@@ -43,9 +43,9 @@
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportAllInFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statisticToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cleanToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.cleanToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.QrCountNumber)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -55,7 +55,7 @@
             // 
             this.QrCountNumber.Location = new System.Drawing.Point(12, 18);
             this.QrCountNumber.Maximum = new decimal(new int[] {
-            10000,
+            100000,
             0,
             0,
             0});
@@ -180,23 +180,30 @@
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.LoadButton_Click);
             // 
             // exportAllInFileToolStripMenuItem
             // 
             this.exportAllInFileToolStripMenuItem.Name = "exportAllInFileToolStripMenuItem";
-            this.exportAllInFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exportAllInFileToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.exportAllInFileToolStripMenuItem.Text = "Export";
             this.exportAllInFileToolStripMenuItem.Click += new System.EventHandler(this.SaveAllButton_Click);
             // 
             // statisticToolStripMenuItem
             // 
             this.statisticToolStripMenuItem.Name = "statisticToolStripMenuItem";
-            this.statisticToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.statisticToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.statisticToolStripMenuItem.Text = "Statistic";
             this.statisticToolStripMenuItem.Click += new System.EventHandler(this.StatisticButton_Click);
+            // 
+            // cleanToolStripMenuItem1
+            // 
+            this.cleanToolStripMenuItem1.Name = "cleanToolStripMenuItem1";
+            this.cleanToolStripMenuItem1.Size = new System.Drawing.Size(122, 22);
+            this.cleanToolStripMenuItem1.Text = "Clean DB";
+            this.cleanToolStripMenuItem1.Click += new System.EventHandler(this.CleanDbButton_Click);
             // 
             // progressBar1
             // 
@@ -218,13 +225,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(556, 297);
             this.panel1.TabIndex = 12;
-            // 
-            // cleanToolStripMenuItem1
-            // 
-            this.cleanToolStripMenuItem1.Name = "cleanToolStripMenuItem1";
-            this.cleanToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.cleanToolStripMenuItem1.Text = "Clean DB";
-            this.cleanToolStripMenuItem1.Click += new System.EventHandler(this.CleanDbButton_Click);
             // 
             // QrCodes
             // 
