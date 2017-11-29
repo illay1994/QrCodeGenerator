@@ -202,6 +202,7 @@ namespace QrCodeGenerator
                 progressBar1.Maximum = p.QrCodes.Count();
                 using (StreamWriter writer = new StreamWriter(saveFileDialog.OpenFile()))
                 {
+                    writer.WriteLine($"Code,Date");
                     foreach (var item in p.QrCodes.OrderBy(t => t.CreatedAt))
                     {
                         writer.WriteLine($"{item.Code.ToQrCode()},{item.CreatedAt:G}");
@@ -271,7 +272,13 @@ namespace QrCodeGenerator
             }
             using (QrCodesDbContext p = new QrCodesDbContext())
             {
-                progressBar1.Maximum = p.QrCodes.Count() / 1000;
+                int count = p.QrCodes.Count();
+                if (count == 0)
+                {
+                    return;
+                }
+
+                progressBar1.Maximum = (count-1) / 1000 + 2;
                 progressBar1.Value = 0;
                 progressBar1.Visible = true;
                 panel1.Enabled = false;
